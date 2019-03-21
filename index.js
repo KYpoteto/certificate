@@ -31,7 +31,7 @@ const server = http.createServer(
                         }
                         if(input_data.issue_certificate != undefined){
                             console.log("issue certificate");
-                            console.log(certificate.gen_tx());
+                            console.log(certificate.gen_tx(Array(input_data.privatekey1, input_data.privatekey2), input_data.certificate));
                         }
                     })
                 }

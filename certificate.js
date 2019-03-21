@@ -9,12 +9,9 @@ const default_prvkeys = settings.privatekeys;
 const default_redeem_multisig = settings.redeem_multisig;
 const default_txid = settings.txid;
 const default_output_index = settings.output_index;
-const default_change_address = settings.change_address;
 
 const value = settings.value;
 const fee = settings.fee;
-
-const txb = new bitcoin.TransactionBuilder(network);
 
 exports.gen_address = function(arg_prvkeys){
     let prvkeys = arg_prvkeys || default_prvkeys;
@@ -35,47 +32,33 @@ exports.gen_address = function(arg_prvkeys){
     return receive;
 };
 
-exports.gen_tx = function(arg_txid, arg_output_index, arg_prvkeys){
-    /* gen certificate output */
-    let certificate_data = '7465737420666f722043657274696669636174652073797374656d';
+exports.gen_tx = function(arg_prvkeys, arg_certificate){
+    const txb = new bitcoin.TransactionBuilder(network);
 
-    // p2sh version
-    /*
-    // redeem script
-    let redeem = bitcoin.script.fromASM(certificate_data);
-    console.log("redeem script: " + redeem.toString('hex'));
-    
-    // hash the redeem script
-    let payload = bitcoin.crypto.hash160(redeem).toString('hex');
-    console.log("payload: " + payload);
-    
-    // base58check encode the hash
-    let version;
-    if(network == bitcoin.networks.testnet){
-        version = 'c4'; //testnet script
-    }
-    else{
-        version = "";
-    }
-    let certificate_output = base58check.encode(payload, version, 'hex');
-    console.log("address: " + certificate_output);
-    */
+    let txid = default_txid;
+    let output_index = default_output_index;
 
-    // OP_RETURN version
+    console.log(arg_prvkeys);
+    let prvkeys = arg_prvkeys;
+    let certificate_data = arg_certificate;
+
+    let address = module.exports.gen_address(prvkeys);
+
+    // OP_RETURN 
     let certificate_output = bitcoin.payments.embed({data: [Buffer.from(certificate_data, 'hex')]}).output;
     console.log(certificate_output);
 
-    
     // add input tx
-    txb.addInput(default_txid, default_output_index);
+    txb.addInput(txid, output_index);
     
     // add output tx
     txb.addOutput(certificate_output, 0);
-    txb.addOutput(default_change_address, value - fee);
+    txb.addOutput(address.address, value - fee);
     
     // sign
-    txb.sign(0, bip32.fromBase58(default_prvkeys[0], network), Buffer.from(default_redeem_multisig, 'hex'));
-    txb.sign(0, bip32.fromBase58(default_prvkeys[1], network), Buffer.from(default_redeem_multisig, 'hex'));
+    for(let i = 0; i < prvkeys.length; i++){
+        txb.sign(0, bip32.fromBase58(prvkeys[i], network), address.redeem.output);
+    }
     
     // build tx
     const tx = txb.build();
@@ -97,6 +80,7 @@ exports.verify = function(){
 
 
 exports.move_btc = function(){
+    const txb = new bitcoin.TransactionBuilder(network);
 
     const target_address = "2N4RkeZboZDDjfLi6LaKmMUf31oTzLnuJos";   //2 of 2 multisig address
     // add input tx
