@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="">
+    <head>
+        <meta charset="utf-8">
+        <title>issue</title>
+    </head>
+    <body>
+        <h1>証明書発行</h1>
+        <form method="POST" name="issue_info">
+            <input type="hidden" name="dummy">
+            証明書<input type="text" name="certificate" placeholder="証明書ファイル" value="7465737420666f722043657274696669636174652073797374656d"><button>アップロード</button><br>
+            秘密鍵１<input type="text" name="privatekey1" placeholder="tprv..." value="tprv8eNvJamRDCCHSsg8C5uC7sS9dLAW9N2GQgqDhLXs55JgnF4ZwN3CdryEUkr7YsSyVxMDnniAKtpkeRb7mwtgcdHafvUmqwvU5KwujwLT3sY"><br>
+            秘密鍵２<input type="text" name="privatekey2" placeholder="tprv..." value="tprv8eNvJamRDCCHVtnMZ8omn46uZVNMgP7p6TegjutLuzFwidHf4kPX1AsfSCsix9Cx8Ewxnr4q5UYU3kTnmpGMe29oVBF9o8bvEm39isFQiwB"><br>
+            <input type="submit" name="gen_address" value="証明書発行アドレス生成">
+            <input type="submit" name="issue_certificate" value="証明書発行">
+        </form>
+        証明書発行トランザクションID<textarea></textarea>
+    </body>
+</html>
