@@ -130,12 +130,12 @@ exports.verify_invalidation = function(arg_txid, arg_invalidation_list){
 
 exports.verify = function(txid, digest, pubkey){
 
-    if(txid == undefined || digest == undefined || pubkey == undefined){
+    if(txid == '' || digest == '' || pubkey == ''){
         console.log('invalid arg');
         console.log('txid: ' + txid);
         console.log('digest: ' + digest);
         console.log('pubkey: '+ pubkey);
-        return false;
+        return {result:false, message: 'トランザクションID、アドレス、証明書を入力してください'};
     }
     
     // get tx
@@ -145,7 +145,7 @@ exports.verify = function(txid, digest, pubkey){
     }
     catch(e){
         console.log('get tx info failed');
-        return false;
+        return {result: false, message: '証明書の情報を取得できませんでした'};
     }
 
     // check digest
@@ -154,7 +154,7 @@ exports.verify = function(txid, digest, pubkey){
     }
     else{
         console.log('digest NG');
-        return false;
+        return {result: false, message: '証明書が正しくありません'};
     }
 
     // check pubkey
@@ -163,7 +163,7 @@ exports.verify = function(txid, digest, pubkey){
     }
     else{
         console.log('pubkey NG');
-        return false;
+        return {result:false, message:"アドレスが発行者のものと一致しません。"};
     }
 
     // check invalidation
@@ -174,5 +174,5 @@ exports.verify = function(txid, digest, pubkey){
         console.log('txid NG');
     }*/
 
-    return true;
+    return {result:true, message:"正しく検証できました。"};
 }
