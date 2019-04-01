@@ -6,12 +6,13 @@
     </head>
     <body>
         <h1>証明書検証</h1>
-        <form method="POST">
-            トランザクションID<input type="text" name="txid"><br>
-            公開鍵<input type="text" name="publickey"><br>
-            証明書<input type="text" name="certificate"><br>
-            <input type="submit" value="検証">
+        <form method="POST" name="verify_form">
+            <input type="hidden" name="dummy">
+            トランザクションID<input type="text" name="txid" value="<%= txid %>"><br>
+            公開鍵<input type="text" name="publickey" value="<%= pubkey %>"><br>
+            証明書<input type="text" name="certificate" value="<%= certificate %>"><br>
+            <input type="submit" id="submit_button" value='検証'>
         </form>
-        検証結果<textarea></textarea>
+        検証結果<textarea><%= result %></textarea>
     </body>
 </html>
