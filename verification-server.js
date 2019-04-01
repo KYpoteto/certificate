@@ -5,9 +5,8 @@ const setting = require('./settings');
 
 const network = setting.network;
 
-exports.get_tx_outputs_sync = function(arg_txid){
+exports.get_tx_outputs_sync = function(txid){
 
-    let txid = arg_txid || '518271f9ace04f54192ecca9665ac4489f9b373982c56b363047d0bea6f3fc55';
     let ret_tx_outputs = null;
     let ret_address = null;
 
@@ -105,10 +104,10 @@ exports.verify_digest = function(tx_outputs, digest){
     return false;
 }
 
-exports.verify_key = function(address, pubkey){
+exports.verify_key = function(address, input_address){
 
     //chain.so
-    if(address == pubkey){
+    if(address == input_address){
         return true;
     }
     else{
@@ -128,13 +127,13 @@ exports.verify_invalidation = function(arg_txid, arg_invalidation_list){
     }
 }
 
-exports.verify = function(txid, digest, pubkey){
+exports.verify = function(txid, digest, address){
 
-    if(txid == '' || digest == '' || pubkey == ''){
+    if(txid == '' || digest == '' || address == ''){
         console.log('invalid arg');
         console.log('txid: ' + txid);
         console.log('digest: ' + digest);
-        console.log('pubkey: '+ pubkey);
+        console.log('address: '+ address);
         return {result:false, message: 'トランザクションID、アドレス、証明書を入力してください'};
     }
     
@@ -157,13 +156,13 @@ exports.verify = function(txid, digest, pubkey){
         return {result: false, message: '証明書が正しくありません'};
     }
 
-    // check pubkey
-    if(module.exports.verify_key(tx.address, pubkey)){
-        console.log('pubkey OK');
+    // check address
+    if(module.exports.verify_key(tx.address, address)){
+        console.log('address OK');
     }
     else{
-        console.log('pubkey NG');
-        return {result:false, message:"アドレスが発行者のものと一致しません。"};
+        console.log('address NG');
+        return {result:false, message:"アドレスが発行者のものと一致しません"};
     }
 
     // check invalidation
@@ -174,5 +173,5 @@ exports.verify = function(txid, digest, pubkey){
         console.log('txid NG');
     }*/
 
-    return {result:true, message:"正しく検証できました。"};
+    return {result:true, message:"正しく検証できました"};
 }
