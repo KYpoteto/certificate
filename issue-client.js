@@ -111,6 +111,10 @@ exports.move_btc = function(){
     console.log("txid: " + tx.getId());
 }
 
+function error_process(message){
+    alert(message);
+}
+
 function issue(prvkey){
     // generate address
     let address = gen_segwit_address(prvkey);
@@ -118,7 +122,7 @@ function issue(prvkey){
 
     // get utxo
     let XHR = new XMLHttpRequest();
-    XHR.open('POST', "./test");
+    XHR.open('POST', "./issue");
     XHR.send('dummy=&' + "phase=1&" + 'address=' + address);
 
     XHR.onreadystatechange = function(){
@@ -132,7 +136,7 @@ function issue(prvkey){
 
             // broadcast tx
             let XHR2 = new XMLHttpRequest();
-            XHR2.open('POST', "./test")
+            XHR2.open('POST', "./issue")
             XHR2.send('dummy=&' + "phase=2&" + "rawtx=" + rawtx.toHex());
 
             XHR2.onreadystatechange = function(){
