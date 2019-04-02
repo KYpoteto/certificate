@@ -31,17 +31,18 @@ const server = http.createServer(
                             let input_data = qs.parse(req.data);
                             console.log(input_data);
                             if(input_data.phase == '1'){
-                                let utxo = issue.get_utxo(input_data.address);
-                                res.write(JSON.stringify(utxo));
+                                let utxos = issue.get_utxo(input_data.address);
+                                res.write('{"result": ' + (utxos != null? '"OK"': '"NG"') + ', "utxos": ' + JSON.stringify(utxos) + '}');
                                 res.end();
                             }
                             else if(input_data.phase == '2'){
                                 let result = issue.broadcast(input_data.rawtx);
-                                res.write(result == true? "OK": "NG");
+                                res.write('{"result": ' + (result == true? '"OK"': '"NG"') + '}');
                                 res.end();
                             }
                             else{
-                                // TODO
+                                res.write('{result: "NG"}');
+                                res.end();
                             }
                         })
                     }

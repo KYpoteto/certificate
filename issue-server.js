@@ -75,11 +75,10 @@ exports.get_utxo = function(arg_address){
     return ret_utxo;
 }
 
-exports.broadcast = function(arg_rawtx){
-    let rawtx = arg_rawtx || '020000000001010ef1e369a436498b2c5a90ce90022992b364cd788f5000009270e494cbfff7d80100000000ffffffff020000000000000000226a20e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b8554c1d0000000000001600145bfa35f5576e6f1add32b405d8f229619d680fe502483045022100a60bef85dfaf154eb2551958909080b96c7c703606a2fe8acd1fddc3801736ec0220240dccd6b099a041558378665748382fe5680f4b811c3a035b0ff0e31b886559012103a0480a92b4028c2d8d6e2c89c463bcd0ba0db64a1099ba9d970a7cfd24bf2bab00000000';
+exports.broadcast = function(rawtx){
 
     let body;
-    let ret;
+    let ret = false;
     if(setting.api == setting.API.CAHIN_SO){
         // chain.so
         let target_network;

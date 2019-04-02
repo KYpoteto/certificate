@@ -127,36 +127,39 @@ function issue(prvkey){
 
     XHR_get_utxo.onreadystatechange = function(){
         if(XHR_get_utxo.readyState == 4 && XHR_get_utxo.status == 200){
-            console.log(XHR_get_utxo.responseText);
-            let utxos = JSON.parse(XHR_get_utxo.responseText);
+            let result_get_utxo = JSON.parse(XHR_get_utxo.responseText);
 
-            // generate tx
-            let rawtx = gen_rawtx(document.getElementById('privatekey1').value, utxos, document.getElementById('digest').value);
-            console.log(rawtx);
+            if(result_get_utxo.result == 'OK'){
+                // generate tx
+                let rawtx = gen_rawtx(document.getElementById('privatekey1').value, result_get_utxo.utxos, document.getElementById('digest').value);
 
-            // broadcast tx
-            let XHR_broadcast = new XMLHttpRequest();
-            XHR_broadcast.open('POST', "./issue")
-            XHR_broadcast.send('dummy=&' + "phase=2&" + "rawtx=" + rawtx.toHex());
+                // broadcast tx
+                let XHR_broadcast = new XMLHttpRequest();
+                XHR_broadcast.open('POST', "./issue")
+                XHR_broadcast.send('dummy=&' + "phase=2&" + "rawtx=" + rawtx.toHex());
 
-            XHR_broadcast.onreadystatechange = function(){
-                if(XHR_broadcast.readyState == 4 && XHR_broadcast.status == 200){
-                    console.log(XHR_broadcast.responseText);
-                    if(XHR_broadcast.responseText == 'OK'){
-                        document.getElementById('txid').innerText = rawtx.getId();
-                    }
-                    else{
-                        error_process('証明書発行に失敗しました');
+                XHR_broadcast.onreadystatechange = function(){
+                    if(XHR_broadcast.readyState == 4 && XHR_broadcast.status == 200){
+                        let result_broadcast = JSON.parse(XHR_broadcast.responseText);
+                        if(result_broadcast.result == 'OK'){
+                            document.getElementById('txid').innerText = rawtx.getId();
+                        }
+                        else{
+                            error_process('証明書発行に失敗しました');
+                        }
                     }
                 }
+                XHR_broadcast.onerror = function(){
+                    error_process('証明書発行に失敗しました');
+                }
+                XHR_broadcast.onabort = function(){
+                    error_process('証明書発行に失敗しました');
+                }
+                XHR_broadcast.ontimeout = function(){
+                    error_process('証明書発行に失敗しました');
+                }
             }
-            XHR_broadcast.onerror = function(){
-                error_process('証明書発行に失敗しました');
-            }
-            XHR_broadcast.onabort = function(){
-                error_process('証明書発行に失敗しました');
-            }
-            XHR_broadcast.ontimeout = function(){
+            else{
                 error_process('証明書発行に失敗しました');
             }
         }
