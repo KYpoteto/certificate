@@ -14,10 +14,10 @@
             <input type="hidden" id="digest" name="digest">
             <input type="hidden" id="address" name="address">
             <input type="button" name="gen_address" value="証明書発行アドレス生成" onclick="gen_address_qr(document.getElementById('privatekey1').value)">
-            <input type="button" name="issue_certificate" value="証明書発行" onclick="issue(document.getElementById('privatekey1').value)">
+            <input type="button" name="issue_certificate" value="証明書発行" onclick="issue(document.getElementById('privatekey1').value, document.getElementById('digest').value)">
         </form>
-        <img id="qr_address" src="https://chart.googleapis.com/chart?cht=qr&chs=200x200&chco=000000&chl=bitcoin:<%= address %>" style="visibility:<%= visibility %>"/><br>
-        証明書発行トランザクションID：<label id="txid"><%= txid %></label>
+        <img id="qr_address" src="" style="visibility:hidden"/><br>
+        証明書発行トランザクションID：<label id="txid"></label>
     </body>
     <script>
         function read_file(evt){

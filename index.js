@@ -47,10 +47,7 @@ const server = http.createServer(
                         })
                     }
                     else{
-                        var data = ejs.render(issue_template, {
-                            visibility: "hidden",
-                            address: "",
-                            txid: ""});
+                        var data = ejs.render(issue_template);
                         res.writeHead(200, {'Content-Type': 'text/html'});
                         res.write(data);
                         res.end();

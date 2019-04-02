@@ -13,7 +13,7 @@
             アドレス<input type="text" name="address" id="address" value="<%= address %>"><br>
             証明書<input type="file" name="certificate" id="certificate" value="<%= certificate %>"><br>
             <input type="hidden" name="digest" id="digest" value="">
-            <input type="submit" id="submit_button" value='検証'>
+            <input type="submit" id="submit_button" value='検証' onclick="return verify()">
         </form>
         検証結果：<label id="result"><%= result %></label>
     </body>

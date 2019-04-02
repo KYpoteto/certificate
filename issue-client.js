@@ -26,6 +26,10 @@ exports.gen_address_p2sh_p2wpkh = function(arg_prvkey){
 }
 
 function gen_address_qr(prvkey){
+    if(prvkey == ""){
+        error_process("秘密鍵を入力してください");
+        return;
+    }
     let address = gen_segwit_address(prvkey);
     document.getElementById('qr_address').src = "https://chart.googleapis.com/chart?cht=qr&chs=200x200&chco=000000&chl=bitcoin:" + address;
     document.getElementById('qr_address').style.visibility = "visible";
@@ -115,7 +119,12 @@ function error_process(message){
     alert(message);
 }
 
-function issue(prvkey){
+function issue(prvkey, digest){
+    if(prvkey == "" || digest == ""){
+        error_process('秘密鍵、証明書を入力してください');
+        return;
+    }
+
     // generate address
     let address = gen_segwit_address(prvkey);
     document.getElementById('address').value = address;
@@ -131,7 +140,7 @@ function issue(prvkey){
 
             if(result_get_utxo.result == 'OK'){
                 // generate tx
-                let rawtx = gen_rawtx(document.getElementById('privatekey1').value, result_get_utxo.utxos, document.getElementById('digest').value);
+                let rawtx = gen_rawtx(prvkey, result_get_utxo.utxos, digest);
 
                 // broadcast tx
                 let XHR_broadcast = new XMLHttpRequest();
