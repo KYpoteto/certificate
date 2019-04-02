@@ -121,42 +121,55 @@ function issue(prvkey){
     document.getElementById('address').value = address;
 
     // get utxo
-    let XHR = new XMLHttpRequest();
-    XHR.open('POST', "./issue");
-    XHR.send('dummy=&' + "phase=1&" + 'address=' + address);
+    let XHR_get_utxo = new XMLHttpRequest();
+    XHR_get_utxo.open('POST', "./issue");
+    XHR_get_utxo.send('dummy=&' + "phase=1&" + 'address=' + address);
 
-    XHR.onreadystatechange = function(){
-        if(XHR.readyState == 4 && XHR.status == 200){
-            console.log(XHR.responseText);
-            let utxos = JSON.parse(XHR.responseText);
+    XHR_get_utxo.onreadystatechange = function(){
+        if(XHR_get_utxo.readyState == 4 && XHR_get_utxo.status == 200){
+            console.log(XHR_get_utxo.responseText);
+            let utxos = JSON.parse(XHR_get_utxo.responseText);
 
             // generate tx
             let rawtx = gen_rawtx(document.getElementById('privatekey1').value, utxos, document.getElementById('digest').value);
             console.log(rawtx);
 
             // broadcast tx
-            let XHR2 = new XMLHttpRequest();
-            XHR2.open('POST', "./issue")
-            XHR2.send('dummy=&' + "phase=2&" + "rawtx=" + rawtx.toHex());
+            let XHR_broadcast = new XMLHttpRequest();
+            XHR_broadcast.open('POST', "./issue")
+            XHR_broadcast.send('dummy=&' + "phase=2&" + "rawtx=" + rawtx.toHex());
 
-            XHR2.onreadystatechange = function(){
-                if(XHR2.readyState == 4 && XHR2.status == 200){
-                    console.log(XHR2.responseText);
-                    if(XHR2.responseText == 'OK'){
+            XHR_broadcast.onreadystatechange = function(){
+                if(XHR_broadcast.readyState == 4 && XHR_broadcast.status == 200){
+                    console.log(XHR_broadcast.responseText);
+                    if(XHR_broadcast.responseText == 'OK'){
                         document.getElementById('txid').innerText = rawtx.getId();
                     }
                     else{
-                        
+                        error_process('証明書発行に失敗しました');
                     }
                 }
-                else{
-                    //TODO
-                }
+            }
+            XHR_broadcast.onerror = function(){
+                error_process('証明書発行に失敗しました');
+            }
+            XHR_broadcast.onabort = function(){
+                error_process('証明書発行に失敗しました');
+            }
+            XHR_broadcast.ontimeout = function(){
+                error_process('証明書発行に失敗しました');
             }
         }
-        else{
-            //TODO
-        }
+    }
+
+    XHR_get_utxo.onerror = function(){
+        error_process('証明書発行に失敗しました');
+    }
+    XHR_get_utxo.onabort = function(){
+        error_process('証明書発行に失敗しました');
+    }
+    XHR_get_utxo.ontimeout = function(){
+        error_process('証明書発行に失敗しました');
     }
     return;
 }
