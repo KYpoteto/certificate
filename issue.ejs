@@ -3,17 +3,36 @@
     <head>
         <meta charset="utf-8">
         <title>issue</title>
+        <script text="text/javascript" src="./issue.js"></script>
     </head>
     <body>
         <h1>証明書発行</h1>
-        <form method="POST" name="issue_info">
+        秘密鍵<input type="text" id="privatekey1" name="privatekey1" placeholder="tprv..."><br>
+        <form method="POST" id="issue_info" name="issue_info">
             <input type="hidden" name="dummy">
-            証明書<input type="text" name="certificate" placeholder="証明書ファイル"><button>アップロード</button><br>
-            秘密鍵<input type="text" name="privatekey1" placeholder="tprv..."><br>
-            <input type="submit" name="gen_address" value="証明書発行アドレス生成">
-            <input type="submit" name="issue_certificate" value="証明書発行">
+            証明書<input type="file" id="certificate" name="certificate" placeholder="証明書ファイル"><br>
+            <input type="hidden" id="digest" name="digest">
+            <input type="hidden" id="address" name="address">
+            <input type="button" name="gen_address" value="証明書発行アドレス生成" onclick="gen_address_qr(document.getElementById('privatekey1').value)">
+            <input type="button" name="issue_certificate" value="証明書発行" onclick="issue(document.getElementById('privatekey1').value)">
         </form>
-        <img src="https://chart.googleapis.com/chart?cht=qr&chs=200x200&chco=000000&chl=bitcoin:<%= address %>" style="visibility:<%= visibility %>"/><br>
-        証明書発行トランザクションID<textarea><%= txid %></textarea>
+        <img id="qr_address" src="https://chart.googleapis.com/chart?cht=qr&chs=200x200&chco=000000&chl=bitcoin:<%= address %>" style="visibility:<%= visibility %>"/><br>
+        証明書発行トランザクションID：<label id="txid"><%= txid %></label>
     </body>
+    <script>
+        function read_file(evt){
+            document.getElementById('digest').value = '';
+            let files = evt.target.files;
+            for(let i = 0, f; f = files[i]; i++){
+                let reader = new FileReader();
+                reader.onload = (function(){
+                    return function(e){
+                        document.getElementById('digest').value = gen_digest(e.target.result);
+                    }
+                })(f);
+                reader.readAsArrayBuffer(f);
+            }
+        }
+        document.getElementById('certificate').addEventListener('change', read_file, false);
+    </script>
 </html>

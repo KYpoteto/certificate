@@ -5,6 +5,10 @@ const default_prvkey = 'tprv8eNvJamRDCCHSsg8C5uC7sS9dLAW9N2GQgqDhLXs55JgnF4ZwN3C
 
 const network = bitcoin.networks.testnet;
 
+function gen_digest(file_buffer_array){
+    return document.getElementById('digest').textContent = bitcoin.crypto.sha256(Buffer.from(file_buffer_array)).toString('hex');
+}
+
 exports.gen_address_p2sh_p2wpkh = function(arg_prvkey){
     let prvkey = arg_prvkey || default_prvkey;
     let pubkey = bip32.fromBase58(prvkey, network).publicKey;
@@ -21,25 +25,30 @@ exports.gen_address_p2sh_p2wpkh = function(arg_prvkey){
     return receive;
 }
 
-exports.gen_segwit_address = function(arg_prvkey){
-    let prvkey = arg_prvkey || default_prvkey;
+function gen_address_qr(prvkey){
+    let address = gen_segwit_address(prvkey);
+    document.getElementById('qr_address').src = "https://chart.googleapis.com/chart?cht=qr&chs=200x200&chco=000000&chl=bitcoin:" + address;
+    document.getElementById('qr_address').style.visibility = "visible";
+    return;
+}
+
+function get_utxo(prvkey){
+    let address = gen_segwit_address(prvkey);
+    document.getElementById('address').value = address;
+    document.issue_info.submit();
+    return;
+}
+
+function gen_segwit_address(prvkey){
     let pubkey = bip32.fromBase58(prvkey, network).publicKey;
 
     let receive = bitcoin.payments.p2wpkh({pubkey: pubkey, network: network});
-    console.log(receive.input);
-    console.log("address: " + receive.address);
-    console.log("witness: " + receive.witness);
 
     return receive.address;
 }
 
-exports.issue = function(arg_prvkey, arg_utxos, arg_digest){
-    let prvkey = arg_prvkey || default_prvkey;
-    let utxos = arg_utxos || [{ txid: 'd2f0cd061c1ee1352b7d42b58f3d78916836c1d75210fe901fb9a97155e8a7de',
-       output_idx: 1,
-       value_satoshi: 7000 }];
-    let fee = 500;
-    let digest = arg_digest || "374011cc26f0682acd5745f0efc9095d5b7c017bc515dc3c7278168bbe62a131";
+function gen_rawtx(prvkey, utxos, digest){
+    let fee = 50;
 
     let prvkey_obj = bip32.fromBase58(prvkey, network);
     let target = bitcoin.payments.p2wpkh({pubkey: prvkey_obj.publicKey, network: network});
@@ -62,8 +71,8 @@ exports.issue = function(arg_prvkey, arg_utxos, arg_digest){
     txb.addOutput(target.address, sum_value - fee);
 
     // sign
-    for(let utxo of utxos){
-        txb.sign(0, prvkey_obj, null, null, utxo.value_satoshi);
+    for(let i = 0; i < utxos.length; i++){
+        txb.sign(i, prvkey_obj, null, null, utxos[i].value_satoshi);
     }
 
     // build
@@ -79,7 +88,7 @@ exports.move_btc = function(){
     let txid = "56b774e94944c368c4fba0671fd555dc63fe35fead8f1ace4b774477d81a22dd";
     let output_idx = 1;
     let value = 8500;
-    let fee = 500;
+    let fee = 50;
 
     let prvkey_obj = bip32.fromBase58(default_prvkey, network);
     let target = bitcoin.payments.p2wpkh({pubkey: prvkey_obj.publicKey, network: network});
@@ -101,3 +110,53 @@ exports.move_btc = function(){
     console.log("raw tx: " + tx.toHex());
     console.log("txid: " + tx.getId());
 }
+
+function issue(prvkey){
+    // generate address
+    let address = gen_segwit_address(prvkey);
+    document.getElementById('address').value = address;
+
+    // get utxo
+    let XHR = new XMLHttpRequest();
+    XHR.open('POST', "./test");
+    XHR.send('dummy=&' + "phase=1&" + 'address=' + address);
+
+    XHR.onreadystatechange = function(){
+        if(XHR.readyState == 4 && XHR.status == 200){
+            console.log(XHR.responseText);
+            let utxos = JSON.parse(XHR.responseText);
+
+            // generate tx
+            let rawtx = gen_rawtx(document.getElementById('privatekey1').value, utxos, document.getElementById('digest').value);
+            console.log(rawtx);
+
+            // broadcast tx
+            let XHR2 = new XMLHttpRequest();
+            XHR2.open('POST', "./test")
+            XHR2.send('dummy=&' + "phase=2&" + "rawtx=" + rawtx.toHex());
+
+            XHR2.onreadystatechange = function(){
+                if(XHR2.readyState == 4 && XHR2.status == 200){
+                    console.log(XHR2.responseText);
+                    if(XHR2.responseText == 'OK'){
+                        document.getElementById('txid').innerText = rawtx.getId();
+                    }
+                    else{
+                        
+                    }
+                }
+                else{
+                    //TODO
+                }
+            }
+        }
+        else{
+            //TODO
+        }
+    }
+    return;
+}
+
+window.gen_digest = gen_digest;
+window.gen_address_qr = gen_address_qr;
+window.issue = issue;

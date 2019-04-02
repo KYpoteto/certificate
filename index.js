@@ -4,7 +4,6 @@ const ejs = require('ejs');
 const qs = require('querystring');
 const verification = require('./verification-server');
 const issue = require('./issue-server');
-const issue_client = require('./issue-client');
 
 const issue_template = fs.readFileSync(__dirname + '/issue.ejs', 'utf-8');
 const verify_tmplate = fs.readFileSync(__dirname + '/verify.ejs', 'utf-8');
@@ -30,44 +29,19 @@ const server = http.createServer(
                         })
                         req.on("end", function(){
                             let input_data = qs.parse(req.data);
-                            if(input_data.gen_address != undefined){
-                                console.log("gen address");
-                                let address = issue_client.gen_segwit_address(input_data.privatekey1);
-                                //console.log("address: " + address.address);
-                                var data = ejs.render(issue_template, {
-                                    visibility: "visible",
-                                    address: address,
-                                    txid: ""});
-                                res.writeHead(200, {'Content-Type': 'text/html'});
-                                res.write(data);
+                            console.log(input_data);
+                            if(input_data.phase == '1'){
+                                let utxo = issue.get_utxo(input_data.address);
+                                res.write(JSON.stringify(utxo));
                                 res.end();
                             }
-                            else if(input_data.issue_certificate != undefined){
-                                console.log("issue certificate");
-                                // client generates address
-                                let address = issue_client.gen_segwit_address(input_data.privatekey1);
-                                // server gets utxt
-                                let utxo = issue.get_utxo(address);
-                                console.log(utxo);
-                                // client generates tx
-                                let rawtx = issue_client.issue(input_data.privatekey1, utxo, verification_client.gen_message_digest(input_data.certificate));
-                                // server broadcast
-                                let result = issue.broadcast(rawtx.toHex());
-                                let txid;
-                                if(result == true){
-                                    txid = rawtx.getId();
-                                }
-                                else{
-                                    txid = 'issue failed';
-                                }
-                                //console.log("txid: " + tx.getId());
-                                var data = ejs.render(issue_template, {
-                                    visibility: "visible",
-                                    address: address.address,
-                                    txid: txid});
-                                res.writeHead(200, {'Content-Type': 'text/html'});
-                                res.write(data);
+                            else if(input_data.phase == '2'){
+                                let result = issue.broadcast(input_data.rawtx);
+                                res.write(result == true? "OK": "NG");
                                 res.end();
+                            }
+                            else{
+                                // TODO
                             }
                         })
                     }
