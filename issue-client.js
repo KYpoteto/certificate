@@ -1,29 +1,12 @@
 const bitcoin = require('bitcoinjs-lib');
 const bip32 = require('bip32');
 const common = require('./common');
+const settings = require('./settings');
 
-const default_prvkey = 'tprv8eNvJamRDCCHSsg8C5uC7sS9dLAW9N2GQgqDhLXs55JgnF4ZwN3CdryEUkr7YsSyVxMDnniAKtpkeRb7mwtgcdHafvUmqwvU5KwujwLT3sY';
-
-const network = bitcoin.networks.testnet;
+const network = settings.network;
 
 function gen_digest(file_buffer_array){
     return common.gen_digest(file_buffer_array);
-}
-
-exports.gen_address_p2sh_p2wpkh = function(arg_prvkey){
-    let prvkey = arg_prvkey || default_prvkey;
-    let pubkey = bip32.fromBase58(prvkey, network).publicKey;
-
-    let receive = bitcoin.payments.p2sh({
-        redeem: bitcoin.payments.p2wpkh({pubkey: pubkey, network: network}),
-        network: network
-    });
-    console.log(receive.input);
-    console.log("address: " + receive.address);
-    console.log("redeem: " + receive.redeem.output.toString('hex'));
-    console.log("witness: " + receive.witness);
-
-    return receive;
 }
 
 function gen_address_qr(prvkey){
@@ -34,13 +17,6 @@ function gen_address_qr(prvkey){
     let address = gen_segwit_address(prvkey);
     document.getElementById('qr_address').src = "https://chart.googleapis.com/chart?cht=qr&chs=200x200&chco=000000&chl=bitcoin:" + address;
     document.getElementById('qr_address').style.visibility = "visible";
-    return;
-}
-
-function get_utxo(prvkey){
-    let address = gen_segwit_address(prvkey);
-    document.getElementById('address').value = address;
-    document.issue_info.submit();
     return;
 }
 
@@ -87,33 +63,6 @@ function gen_rawtx(prvkey, utxos, digest){
     console.log("txid: " + tx.getId());
 
     return tx;
-}
-
-exports.move_btc = function(){
-    let txid = "56b774e94944c368c4fba0671fd555dc63fe35fead8f1ace4b774477d81a22dd";
-    let output_idx = 1;
-    let value = 8500;
-    let fee = 50;
-
-    let prvkey_obj = bip32.fromBase58(default_prvkey, network);
-    let target = bitcoin.payments.p2wpkh({pubkey: prvkey_obj.publicKey, network: network});
-
-    let txb = new bitcoin.TransactionBuilder(network);
-
-    // add input
-    txb.addInput(txid, output_idx, null , target.output);
-
-    // add output
-    txb.addOutput(target.address, value - fee);
-
-    // sign
-    txb.sign(0, prvkey_obj, null, null, value);
-
-    // build
-    const tx = txb.build();
-
-    console.log("raw tx: " + tx.toHex());
-    console.log("txid: " + tx.getId());
 }
 
 function issue(prvkey, digest){
