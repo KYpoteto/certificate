@@ -1,12 +1,13 @@
 const bitcoin = require('bitcoinjs-lib');
 const bip32 = require('bip32');
+const common = require('./common');
 
 const default_prvkey = 'tprv8eNvJamRDCCHSsg8C5uC7sS9dLAW9N2GQgqDhLXs55JgnF4ZwN3CdryEUkr7YsSyVxMDnniAKtpkeRb7mwtgcdHafvUmqwvU5KwujwLT3sY';
 
 const network = bitcoin.networks.testnet;
 
 function gen_digest(file_buffer_array){
-    return document.getElementById('digest').textContent = bitcoin.crypto.sha256(Buffer.from(file_buffer_array)).toString('hex');
+    return common.gen_digest(file_buffer_array);
 }
 
 exports.gen_address_p2sh_p2wpkh = function(arg_prvkey){
@@ -27,7 +28,7 @@ exports.gen_address_p2sh_p2wpkh = function(arg_prvkey){
 
 function gen_address_qr(prvkey){
     if(prvkey == ""){
-        error_process("秘密鍵を入力してください");
+        common.error_process("秘密鍵を入力してください");
         return;
     }
     let address = gen_segwit_address(prvkey);
@@ -115,13 +116,9 @@ exports.move_btc = function(){
     console.log("txid: " + tx.getId());
 }
 
-function error_process(message){
-    alert(message);
-}
-
 function issue(prvkey, digest){
     if(prvkey == "" || digest == ""){
-        error_process('秘密鍵、証明書を入力してください');
+        common.error_process('秘密鍵、証明書を入力してください');
         return;
     }
 
@@ -154,34 +151,34 @@ function issue(prvkey, digest){
                             document.getElementById('txid').innerText = rawtx.getId();
                         }
                         else{
-                            error_process('証明書発行に失敗しました');
+                            common.error_process('証明書発行に失敗しました');
                         }
                     }
                 }
                 XHR_broadcast.onerror = function(){
-                    error_process('証明書発行に失敗しました');
+                    common.error_process('証明書発行に失敗しました');
                 }
                 XHR_broadcast.onabort = function(){
-                    error_process('証明書発行に失敗しました');
+                    common.error_process('証明書発行に失敗しました');
                 }
                 XHR_broadcast.ontimeout = function(){
-                    error_process('証明書発行に失敗しました');
+                    common.error_process('証明書発行に失敗しました');
                 }
             }
             else{
-                error_process('証明書発行に失敗しました');
+                common.error_process('証明書発行に失敗しました');
             }
         }
     }
 
     XHR_get_utxo.onerror = function(){
-        error_process('証明書発行に失敗しました');
+        common.error_process('証明書発行に失敗しました');
     }
     XHR_get_utxo.onabort = function(){
-        error_process('証明書発行に失敗しました');
+        common.error_process('証明書発行に失敗しました');
     }
     XHR_get_utxo.ontimeout = function(){
-        error_process('証明書発行に失敗しました');
+        common.error_process('証明書発行に失敗しました');
     }
     return;
 }
