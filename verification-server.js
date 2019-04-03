@@ -1,5 +1,4 @@
 const bitcoin = require('bitcoinjs-lib');
-const https = require('https');
 const request = require('sync-request');
 const setting = require('./settings');
 

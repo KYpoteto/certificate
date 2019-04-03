@@ -2,6 +2,8 @@ const http = require('http');
 const fs = require('fs');
 const ejs = require('ejs');
 const qs = require('querystring');
+const bitcoin = require('bitcoinjs-lib');
+const settings = require('./settings');
 const verification = require('./verification-server');
 const issue = require('./issue-server');
 
@@ -47,7 +49,9 @@ const server = http.createServer(
                         })
                     }
                     else{
-                        var data = ejs.render(issue_template);
+                        var data = ejs.render(issue_template,{
+                            prvkey_type: (settings.network == bitcoin.networks.bitcoin? 'xprv...': 'tprv...')
+                        });
                         res.writeHead(200, {'Content-Type': 'text/html'});
                         res.write(data);
                         res.end();

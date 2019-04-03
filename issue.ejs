@@ -7,7 +7,7 @@
     </head>
     <body>
         <h1>証明書発行</h1>
-        秘密鍵<input type="text" id="privatekey1" name="privatekey1" placeholder="tprv..."><br>
+        秘密鍵<input type="text" id="privatekey1" name="privatekey1" placeholder="<%= prvkey_type %>"><br>
         <form method="POST" id="issue_info" name="issue_info">
             <input type="hidden" name="dummy">
             証明書<input type="file" id="certificate" name="certificate" placeholder="証明書ファイル"><br>
