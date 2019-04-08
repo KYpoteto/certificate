@@ -17,6 +17,7 @@
             <input type="button" name="issue_certificate" value="証明書発行" onclick="issue(document.getElementById('privatekey1').value, document.getElementById('digest').value)">
         </form>
         <img id="qr_address" src="" style="visibility:hidden"/><br>
+        <label id="label_address" style="visibility:hidden"></label><br><br>
         証明書発行トランザクションID： <label id="txid"></label>
     </body>
     <script>

@@ -17,6 +17,8 @@ function gen_address_qr(prvkey){
     let address = gen_segwit_address(prvkey);
     document.getElementById('qr_address').src = "https://chart.googleapis.com/chart?cht=qr&chs=200x200&chco=000000&chl=bitcoin:" + address;
     document.getElementById('qr_address').style.visibility = "visible";
+    document.getElementById('label_address').innerHTML = address;
+    document.getElementById('label_address').style.visibility = "visible";
     return;
 }
 
