@@ -8,8 +8,8 @@ exports.get_utxo = function(arg_address){
     let address = arg_address || 'tb1qt0arta2hdeh34hfjksza3u3fvxwksrl9mt5ny5';
 
     let ret_utxo;
-
-    if(setting.api == setting.API.CAHIN_SO){
+    
+    if(setting.api == setting.API.CHAIN_SO){
         // chain.so
         let target_network;
         if(network == bitcoin.networks.bitcoin){
@@ -78,7 +78,7 @@ exports.broadcast = function(rawtx){
 
     let body;
     let ret = false;
-    if(setting.api == setting.API.CAHIN_SO){
+    if(setting.api == setting.API.CHAIN_SO){
         // chain.so
         let target_network;
         if(network == bitcoin.networks.bitcoin){

@@ -9,7 +9,7 @@ exports.get_tx_outputs_sync = function(txid){
     let ret_tx_outputs = null;
     let ret_address = null;
 
-    if(setting.api == setting.API.CAHIN_SO){
+    if(setting.api == setting.API.CHAIN_SO){
         // chain.so
         let target_network;
         if(network == bitcoin.networks.bitcoin){
