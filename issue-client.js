@@ -31,7 +31,7 @@ function gen_segwit_address(prvkey){
 }
 
 function gen_rawtx(prvkey, utxos, digest){
-    let fee = 50;
+    let fee = 250;
 
     let prvkey_obj = bip32.fromBase58(prvkey, network);
     let target = bitcoin.payments.p2wpkh({pubkey: prvkey_obj.publicKey, network: network});
@@ -102,34 +102,34 @@ function issue(prvkey, digest){
                             document.getElementById('txid').innerText = rawtx.getId();
                         }
                         else{
-                            common.error_process('証明書発行に失敗しました');
+                            common.error_process('証明書発行に失敗しました: ' + result_broadcast.result);
                         }
                     }
                 }
                 XHR_broadcast.onerror = function(){
-                    common.error_process('証明書発行に失敗しました');
+                    common.error_process('証明書発行に失敗しました: onerror');
                 }
                 XHR_broadcast.onabort = function(){
-                    common.error_process('証明書発行に失敗しました');
+                    common.error_process('証明書発行に失敗しました: onabort');
                 }
                 XHR_broadcast.ontimeout = function(){
-                    common.error_process('証明書発行に失敗しました');
+                    common.error_process('証明書発行に失敗しました: intimeout');
                 }
             }
             else{
-                common.error_process('証明書発行に失敗しました');
+                common.error_process('証明書発行に失敗しました: get_utxo NG');
             }
         }
     }
 
     XHR_get_utxo.onerror = function(){
-        common.error_process('証明書発行に失敗しました');
+        common.error_process('証明書発行に失敗しました: onerror');
     }
     XHR_get_utxo.onabort = function(){
-        common.error_process('証明書発行に失敗しました');
+        common.error_process('証明書発行に失敗しました: onabort');
     }
     XHR_get_utxo.ontimeout = function(){
-        common.error_process('証明書発行に失敗しました');
+        common.error_process('証明書発行に失敗しました: ontimeout');
     }
     return;
 }

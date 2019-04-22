@@ -1,13 +1,12 @@
 const bitcoin = require('bitcoinjs-lib');
 const request = require('sync-request');
 const setting = require('./settings');
+const common = require('./common');
 
 const network = setting.network;
 
-exports.get_utxo = function(arg_address){
-    let address = arg_address || 'tb1qt0arta2hdeh34hfjksza3u3fvxwksrl9mt5ny5';
-
-    let ret_utxo;
+exports.get_utxo = async function(address){
+    let ret_utxo = new Array();
     
     if(setting.api == setting.API.CHAIN_SO){
         // chain.so
@@ -20,11 +19,10 @@ exports.get_utxo = function(arg_address){
         }
         const url = 'https://chain.so/api/v2/get_tx_unspent/' + target_network + '/' + address;
         let responce = request('GET', url);
-
+        
         if(responce.statusCode == 200){
             let body = JSON.parse(responce.body);
             console.log(body.data.txs);
-            ret_utxo = new Array();
             for(let i = 0; i < body.data.txs.length; i++){
                 ret_utxo[i] = {
                     txid: body.data.txs[i].txid,
@@ -53,7 +51,6 @@ exports.get_utxo = function(arg_address){
         if(responce.statusCode == 200){
             let body = JSON.parse(responce.body);
             console.log(body.txrefs);
-            ret_utxo = new Array();
             let i = 0;
             for(let utxo of body.txrefs){
                 if(utxo.spent != undefined && utxo.spent != true){
@@ -71,10 +68,34 @@ exports.get_utxo = function(arg_address){
             //{"error": "Address tb1qt0arta2hdeh34hfjksza3u3fvxwksrl9mt5ny5 is invalid: Address tb1qt0arta2hdeh34hfjksza3u3fvxwksrl9mt5ny5 is of unknown size."}
         }
     }
+    else if(setting.api == setting.API.MY_NODE){
+        // bitcoind
+        console.log('bitcoin node');
+        let responce = await common.btc_cli_command('scantxoutset', 'start', ["addr(" + address + ")"] );
+        console.log('responce');
+        console.log(responce);
+        
+        if(responce.error == null){
+            for(let i = 0; i < responce.result.unspents.length; i++){
+                let utxo = responce.result.unspents[i];
+                console.log(utxo);
+                ret_utxo[i] = {
+                    txid: utxo.txid,
+                    output_idx: utxo.vout,
+                    value_satoshi: Number(utxo.amount.toFixed(8).replace('.', ''))
+                };
+                console.log(ret_utxo[i]);
+            }
+        }
+        else{
+            ret_utxo = null;
+            console.log(responce.error);
+        }
+    }
     return ret_utxo;
 }
 
-exports.broadcast = function(rawtx){
+exports.broadcast = async function(rawtx){
 
     let body;
     let ret = false;
@@ -116,6 +137,20 @@ exports.broadcast = function(rawtx){
         }
         else{
             console.log('error: '+ responce.statusCode);
+            ret = false;
+        }
+    }
+    else if(setting.api == setting.API.MY_NODE){
+        // bitcoind
+        console.log('bitcoin node');
+        let responce = await common.btc_cli_command('sendrawtransaction', rawtx);
+        console.log('responce');
+        console.log(responce);
+        
+        if(responce.error == null){
+            ret = true;
+        }
+        else{
             ret = false;
         }
     }

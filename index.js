@@ -29,16 +29,16 @@ const server = http.createServer(
                         req.on("readable", function(){
                             req.data += req.read() || '';
                         })
-                        req.on("end", function(){
+                        req.on("end", async function(){
                             let input_data = qs.parse(req.data);
                             console.log(input_data);
                             if(input_data.phase == '1'){
-                                let utxos = issue.get_utxo(input_data.address);
+                                let utxos = await issue.get_utxo(input_data.address);
                                 res.write('{"result": ' + (utxos != null? '"OK"': '"NG"') + ', "utxos": ' + JSON.stringify(utxos) + '}');
                                 res.end();
                             }
                             else if(input_data.phase == '2'){
-                                let result = issue.broadcast(input_data.rawtx);
+                                let result = await issue.broadcast(input_data.rawtx);
                                 res.write('{"result": ' + (result == true? '"OK"': '"NG"') + '}');
                                 res.end();
                             }
