@@ -1,5 +1,4 @@
 const bitcoin = require('bitcoinjs-lib');
-const rp = require('request-promise');
 const setting = require('./settings');
 const common = require('./common');
 
@@ -18,13 +17,12 @@ exports.get_utxo = async function(address){
             target_network = "BTCTEST";
         }
         const url = 'https://chain.so/api/v2/get_tx_unspent/' + target_network + '/' + address;
-        //let responce = request('GET', url);
         let request_op = {
             url: url,
             method: 'GET',
             json: true
         }
-        let responce = await rp(request_op).catch(e =>{
+        let responce = await common.request(request_op).catch(e =>{
             console.log('get utxo fail: ' + e);
             return null;
         })
@@ -97,7 +95,7 @@ exports.broadcast = async function(rawtx){
             headers: {"content-type": "application/json"},
             json: {tx_hex: rawtx}
         }
-        let responce = await rp(request_op).catch(e => {
+        let responce = await common.request(request_op).catch(e => {
             console.log('broadcast tx fail: ' + e);
             return false;
         })

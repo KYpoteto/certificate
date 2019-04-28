@@ -1,5 +1,5 @@
 const bitcoin = require('bitcoinjs-lib');
-const rp = require('request-promise');
+const common = require('./common')
 const setting = require('./settings');
 
 const network = setting.network;
@@ -26,7 +26,7 @@ exports.get_tx_outputs_sync = async function(txid){
             method: 'GET',
             json: true
         }
-        let responce = await rp(request_op);
+        let responce = await common.request(request_op);
         console.log(responce);
 
         if(responce.status == 'success'){
