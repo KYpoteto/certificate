@@ -5,7 +5,7 @@ const setting = require('./settings');
 const network = setting.network;
 
 exports.get_tx_outputs_sync = async function(txid){
-    console.log('fn get_tx_output');
+    console.log('--get_tx_output--');
 
     let ret_tx_outputs = null;
     let ret_address = null;
@@ -44,6 +44,34 @@ exports.get_tx_outputs_sync = async function(txid){
         }
         else{
             throw new Error("error: " + responce.status);
+        }
+    }
+    else if(setting.api == setting.API.MY_NODE){
+        // bitcoind
+        console.log('bitcoin node');
+        let responce = await common.btc_cli_command('getrawtransaction', txid, true)
+        .catch(e => {console.log('getrawtransaction failed: ' + e)});
+        console.log('responce');
+        console.log(responce);
+        let prev_tx = await common.btc_cli_command('getrawtransaction', responce.result.vin[0].txid, true)
+        .catch(e => {console.log('getrawtransaction pretx failed: ' + e)});
+        console.log('prev_tx');
+        console.log(prev_tx);
+
+        if(responce.result.vout && prev_tx.result.vout){
+            let i = 0;
+            ret_tx_outputs = new Array();
+            for(let output of responce.result.vout){
+                if(output.scriptPubKey.type == 'nulldata'){
+                    ret_tx_outputs[i++] = {
+                        script: output.scriptPubKey.asm
+                    }
+                }
+            }
+            ret_address = prev_tx.result.vout[responce.result.vin[0].vout].scriptPubKey.addresses[0];
+        }
+        else{
+            throw new Error("error: " + responce.result.status);
         }
     }
     else{
