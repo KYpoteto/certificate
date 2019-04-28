@@ -67,11 +67,22 @@ function gen_rawtx(prvkey, utxos, digest){
     return tx;
 }
 
+function form_disable(val){
+    
+    document.getElementById('privatekey1').disabled = val;
+    document.getElementById('certificate').disabled = val;
+    document.getElementById('gen_address').disabled = val;
+    document.getElementById('issue_certificate').disabled = val;
+
+}
+
 function issue(prvkey, digest){
     if(prvkey == "" || digest == ""){
         common.error_process('秘密鍵、証明書を入力してください');
         return;
     }
+
+    form_disable(true);
 
     // generate address
     let address = gen_segwit_address(prvkey);
@@ -100,36 +111,45 @@ function issue(prvkey, digest){
                         let result_broadcast = JSON.parse(XHR_broadcast.responseText);
                         if(result_broadcast.result == 'OK'){
                             document.getElementById('txid').innerText = rawtx.getId();
+                            form_disable(false);
                         }
                         else{
                             common.error_process('証明書発行に失敗しました: ' + result_broadcast.result);
+                            form_disable(false);
                         }
                     }
                 }
                 XHR_broadcast.onerror = function(){
                     common.error_process('証明書発行に失敗しました: onerror');
+                    form_disable(false);
                 }
                 XHR_broadcast.onabort = function(){
                     common.error_process('証明書発行に失敗しました: onabort');
+                    form_disable(false);
                 }
                 XHR_broadcast.ontimeout = function(){
                     common.error_process('証明書発行に失敗しました: intimeout');
+                    form_disable(false);
                 }
             }
             else{
                 common.error_process('証明書発行に失敗しました: get_utxo NG');
+                form_disable(false);
             }
         }
     }
 
     XHR_get_utxo.onerror = function(){
         common.error_process('証明書発行に失敗しました: onerror');
+        form_disable(false);
     }
     XHR_get_utxo.onabort = function(){
         common.error_process('証明書発行に失敗しました: onabort');
+        form_disable(false);
     }
     XHR_get_utxo.ontimeout = function(){
         common.error_process('証明書発行に失敗しました: ontimeout');
+        form_disable(false);
     }
     return;
 }
