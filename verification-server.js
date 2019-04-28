@@ -1,5 +1,4 @@
 const bitcoin = require('bitcoinjs-lib');
-const request = require('sync-request');
 const rp = require('request-promise');
 const setting = require('./settings');
 
@@ -27,7 +26,6 @@ exports.get_tx_outputs_sync = async function(txid){
             method: 'GET',
             json: true
         }
-        //let responce = request('GET', url);
         let responce = await rp(request_op);
         console.log(responce);
 

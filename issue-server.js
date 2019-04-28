@@ -24,14 +24,11 @@ exports.get_utxo = async function(address){
             method: 'GET',
             json: true
         }
-        let responce = await rp(url, {
-            method: 'GET'
-        }).catch(e =>{
+        let responce = await rp(request_op).catch(e =>{
             console.log('get utxo fail: ' + e);
             return null;
         })
         console.log(responce);
-        responce = JSON.parse(responce);
         
         if(responce.status == "success"){
             console.log(responce.data.txs);
