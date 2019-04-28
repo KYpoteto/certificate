@@ -1,16 +1,19 @@
 const bitcoin = require('bitcoinjs-lib');
 const request = require('sync-request');
+const rp = require('request-promise');
 const setting = require('./settings');
 
 const network = setting.network;
 
-exports.get_tx_outputs_sync = function(txid){
+exports.get_tx_outputs_sync = async function(txid){
+    console.log('fn get_tx_output');
 
     let ret_tx_outputs = null;
     let ret_address = null;
 
     if(setting.api == setting.API.CHAIN_SO){
         // chain.so
+        //console.log('chain.so');
         let target_network;
         if(network == bitcoin.networks.bitcoin){
             target_network = "BTC";
@@ -19,58 +22,34 @@ exports.get_tx_outputs_sync = function(txid){
             target_network = "BTCTEST";
         }
         const url = 'https://chain.so/api/v2/get_tx/' + target_network + '/' + txid;
-        let responce = request('GET', url);
+        let request_op = {
+            url: url,
+            method: 'GET',
+            json: true
+        }
+        //let responce = request('GET', url);
+        let responce = await rp(request_op);
+        console.log(responce);
 
-        if(responce.statusCode == 200){
-            let body = JSON.parse(responce.body);
-            console.log(body.data.inputs[0]);
+        if(responce.status == 'success'){
+            console.log(responce.data.inputs[0]);
             let i = 0;
             ret_tx_outputs = new Array();
-            for(let output of body.data.outputs){
+            for(let output of responce.data.outputs){
                 if(output.type == 'nulldata'){
                     ret_tx_outputs[i++] = {
                         script: output.script
                     }
                 }
             }
-            ret_address = body.data.inputs[0].address;
+            ret_address = responce.data.inputs[0].address;
         }
         else{
-            throw new Error("error: " + responce.statusCode);
+            throw new Error("error: " + responce.status);
         }
     }
-    else if(setting.api == setting.API.BLOCK_CYPHER){
-        // block cypher
-        let target_network;
-        if(network == bitcoin.networks.bitcoin){
-            target_network = "main";
-        }
-        else{
-            target_network = "test3";
-        }
-        const url = 'https://api.blockcypher.com/v1/btc/' + target_network + '/txs/' + txid;
-        let responce = request('GET', url);
-
-        if(responce.statusCode == 200){
-            let body = JSON.parse(responce.body);
-            console.log(body);
-            let i = 0;
-            ret_tx_outputs = new Array();
-            for(let output of body.outputs){
-                if(output.script_type == 'null-data'){
-                    ret_tx_outputs[i++] = {
-                        script: output.script
-                    }
-                }
-            }
-            for(let w of body.inputs[0].witness){
-                console.log(w);
-            }
-            ret_address = body.inputs[0].addresses[0];
-        }
-        else{
-            throw new Error("error: " + responce.statusCode);
-        }
+    else{
+        throw new Error('not applicable API server.');
     }
     return {address: ret_address, outputs: ret_tx_outputs};
 }
@@ -105,7 +84,6 @@ exports.verify_digest = function(tx_outputs, digest){
 
 exports.verify_key = function(address, input_address){
 
-    //chain.so
     if(address == input_address){
         return true;
     }
@@ -126,7 +104,7 @@ exports.verify_invalidation = function(arg_txid, arg_invalidation_list){
     }
 }
 
-exports.verify = function(txid, digest, address){
+exports.verify = async function(txid, digest, address){
 
     if(txid == '' || digest == '' || address == ''){
         console.log('invalid arg');
@@ -139,7 +117,7 @@ exports.verify = function(txid, digest, address){
     // get tx
     let tx;
     try{
-        tx = module.exports.get_tx_outputs_sync(txid);
+        tx = await module.exports.get_tx_outputs_sync(txid);
     }
     catch(e){
         console.log('get tx info failed');

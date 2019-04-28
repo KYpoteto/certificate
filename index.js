@@ -62,10 +62,10 @@ const server = http.createServer(
                         req.on("readable", function(){
                             req.data += req.read() || '';
                         })
-                        req.on("end", function(){
+                        req.on("end", async function(){
                             let input_data = qs.parse(req.data);
                             console.log(input_data);
-                            let result = verification.verify(input_data.txid, input_data.digest, input_data.address);
+                            let result = await verification.verify(input_data.txid, input_data.digest, input_data.address);
 
                             var data = ejs.render(verify_tmplate, {
                                 txid: input_data.txid,
